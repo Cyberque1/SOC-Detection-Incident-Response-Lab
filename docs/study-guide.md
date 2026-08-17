@@ -165,6 +165,23 @@ The source was independently confirmed with:
 w32tm /query /source
 ```
 
+### Kali Time Verification
+
+Kali was verified with:
+
+```bash
+timedatectl
+```
+
+The result showed:
+
+- `Time zone: America/New_York (EDT, -0400)`
+- `System clock synchronized: yes`
+- `NTP service: active`
+- `RTC in local TZ: no`
+
+This confirmed that the Kali VM was already synchronized and using the correct Eastern time zone. With Windows corrected and synchronized, both systems can now be correlated using consistent timestamps.
+
 ### Analyst Lesson
 
 If event timestamps appear wrong, do not immediately assume the log data is corrupt. Check:
@@ -239,6 +256,12 @@ Request Windows time synchronization:
 w32tm /resync
 ```
 
+Check Kali time and NTP status:
+
+```bash
+timedatectl
+```
+
 ## Memory Recall Questions
 
 Try answering these without looking at the documentation.
@@ -267,6 +290,8 @@ Try answering these without looking at the documentation.
 22. What did `Source: Local CMOS Clock` tell us before synchronization?
 23. What command verifies the current Windows time source?
 24. What showed that Windows successfully synchronized after the resync?
+25. What does `System clock synchronized: yes` tell you on Kali?
+26. Why should both systems be time-synchronized before correlating events?
 
 ## Recall Goal
 
