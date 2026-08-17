@@ -111,9 +111,71 @@ The connection was confirmed using three observations:
 
 This is a basic example of event correlation.
 
-### Timestamp Lesson
+## Timestamp and Time Synchronization Lesson
 
-The lab showed a discrepancy between Sysmon's `UtcTime` field and the local Event Viewer `Logged` time. Future investigations should verify time synchronization and normalize timestamps before building a timeline.
+During the investigation, the Windows VM appeared about three hours behind the host system. The root cause was an incorrect Windows time-zone setting: the VM was configured for Pacific Time while the lab was operating in Eastern Time.
+
+The Windows time zone was corrected with:
+
+```powershell
+Set-TimeZone -Id "Eastern Standard Time"
+```
+
+Verification:
+
+```powershell
+Get-TimeZone
+Get-Date
+```
+
+The Windows Time service was then checked:
+
+```powershell
+Get-Service W32Time
+```
+
+It was initially stopped. It was started with:
+
+```powershell
+Start-Service W32Time
+```
+
+Before synchronization, `w32tm /query /status` showed:
+
+- `Leap Indicator: 3 (not synchronized)`
+- `Last Successful Sync Time: unspecified`
+- `Source: Local CMOS Clock`
+
+A synchronization was requested with:
+
+```powershell
+w32tm /resync
+```
+
+After synchronization, verification showed:
+
+- `Leap Indicator: 0 (no warning)`
+- `Stratum: 5`
+- `Last Successful Sync Time: 8/17/2026 7:38:41 PM`
+- `Source: time.windows.com,0x9`
+
+The source was independently confirmed with:
+
+```powershell
+w32tm /query /source
+```
+
+### Analyst Lesson
+
+If event timestamps appear wrong, do not immediately assume the log data is corrupt. Check:
+
+1. System time zone
+2. Current local time
+3. Time synchronization service status
+4. Configured time source
+5. UTC versus local-time fields
+
+Accurate and synchronized clocks are critical when correlating events across multiple systems.
 
 ## Commands to Recognize
 
@@ -153,6 +215,30 @@ Create the lab TCP 8080 firewall rule:
 New-NetFirewallRule -DisplayName "Lab TCP 8080 from Kali" -Direction Inbound -Protocol TCP -LocalPort 8080 -RemoteAddress 192.168.64.3 -Action Allow
 ```
 
+Check Windows time zone:
+
+```powershell
+Get-TimeZone
+```
+
+Check Windows Time status:
+
+```powershell
+w32tm /query /status
+```
+
+Check Windows time source:
+
+```powershell
+w32tm /query /source
+```
+
+Request Windows time synchronization:
+
+```powershell
+w32tm /resync
+```
+
 ## Memory Recall Questions
 
 Try answering these without looking at the documentation.
@@ -177,6 +263,10 @@ Try answering these without looking at the documentation.
 18. How did we distinguish the correct Event ID 3 from unrelated background network events?
 19. What process owned the Windows listener?
 20. Why is timestamp normalization important during an investigation?
+21. What caused the Windows VM to appear three hours behind?
+22. What did `Source: Local CMOS Clock` tell us before synchronization?
+23. What command verifies the current Windows time source?
+24. What showed that Windows successfully synchronized after the resync?
 
 ## Recall Goal
 
