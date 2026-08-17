@@ -32,6 +32,21 @@ Identifies a network interface/host location for communication in the lab.
 
 Identifies the application or service endpoint involved in TCP/UDP communication.
 
+### TCP Listener
+
+A process that waits on a specific TCP port for incoming connection attempts.
+
+### Ephemeral Source Port
+
+A temporary client-side port chosen for an outbound connection. In the TCP 8080 exercise, Kali used source port `37760` while Windows listened on destination port `8080`.
+
+### Sysmon `Initiated` Field
+
+- `true` — the monitored process initiated the connection.
+- `false` — the monitored process accepted a connection initiated elsewhere.
+
+In the TCP 8080 exercise, Windows showed `Initiated: false` because Kali initiated the connection.
+
 ## Investigation Sequence
 
 When reviewing a security event, ask:
@@ -43,8 +58,62 @@ When reviewing a security event, ask:
 5. What source and destination systems were involved?
 6. What protocol and ports were used?
 7. Did the action succeed or fail?
-8. What other events correlate with it?
-9. What conclusion does the combined evidence support?
+8. Which side initiated the connection?
+9. What other events correlate with it?
+10. What conclusion does the combined evidence support?
+
+## TCP 8080 Exercise — Verified Evidence
+
+Known test activity:
+
+```text
+LAB-KALI-01
+192.168.64.3:37760
+        |
+        | TCP
+        v
+192.168.64.2:8080
+LAB-ENDPOINT-01
+powershell.exe
+```
+
+Matching Sysmon Event ID `3` showed:
+
+- `Image: powershell.exe`
+- `Protocol: tcp`
+- `Initiated: false`
+- `SourceIp: 192.168.64.3`
+- `SourcePort: 37760`
+- `DestinationIp: 192.168.64.2`
+- `DestinationPort: 8080`
+
+### Why This Event Was the Match
+
+The event matched the known activity across multiple fields:
+
+- Correct protocol: TCP
+- Correct source: Kali
+- Correct destination: Windows
+- Correct destination port: 8080
+- Correct direction: inbound to Windows
+- Correct receiving process: PowerShell
+- Correct time window
+
+Unrelated Event ID 3 entries were rejected when they showed different protocols, processes, directions, ports, or timestamps.
+
+### Correlation Lesson
+
+The connection was confirmed using three observations:
+
+1. Kali Netcat reported port `8080` open.
+2. Windows PowerShell displayed `Connection received!`.
+3. Sysmon Event ID `3` recorded the matching network telemetry.
+
+This is a basic example of event correlation.
+
+### Timestamp Lesson
+
+The lab showed a discrepancy between Sysmon's `UtcTime` field and the local Event Viewer `Logged` time. Future investigations should verify time synchronization and normalize timestamps before building a timeline.
 
 ## Commands to Recognize
 
@@ -78,6 +147,12 @@ TCP port test with Netcat:
 nc -vz <IP> <PORT>
 ```
 
+Create the lab TCP 8080 firewall rule:
+
+```powershell
+New-NetFirewallRule -DisplayName "Lab TCP 8080 from Kali" -Direction Inbound -Protocol TCP -LocalPort 8080 -RemoteAddress 192.168.64.3 -Action Allow
+```
+
 ## Memory Recall Questions
 
 Try answering these without looking at the documentation.
@@ -96,7 +171,12 @@ Try answering these without looking at the documentation.
 12. Why are IP addresses re-verified before network exercises?
 13. What does `nc -vz <IP> <PORT>` do?
 14. Why should lab firewall rules be narrowly scoped?
-15. What evidence would prove that Kali communicated with Windows?
+15. What evidence proved that Kali communicated with Windows?
+16. What did `Initiated: false` mean in our Sysmon event?
+17. Why was Kali's source port `37760` different from Windows destination port `8080`?
+18. How did we distinguish the correct Event ID 3 from unrelated background network events?
+19. What process owned the Windows listener?
+20. Why is timestamp normalization important during an investigation?
 
 ## Recall Goal
 
