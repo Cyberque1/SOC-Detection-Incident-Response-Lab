@@ -118,8 +118,6 @@ The matching Event ID `3` contained:
 - **Destination IP:** `192.168.64.2`
 - **Destination hostname:** `Lab-Endpoint-01.myfiosgateway.com`
 - **Destination port:** `8080`
-- **Event Viewer logged time:** approximately `8/17/2026 4:13:17 PM`
-- **Sysmon UtcTime field observed:** `2026-08-18 02:13:16.280`
 
 ## Analyst Interpretation
 
@@ -170,9 +168,47 @@ This is event correlation: multiple pieces of telemetry are combined to reconstr
 - **Connection direction:** Inbound to the Windows endpoint (`Initiated: false`)
 - **Conclusion:** The known Kali-to-Windows TCP test was successfully generated, received, and identified in endpoint telemetry.
 
-## Timestamp Note
+## Timestamp Troubleshooting
 
-A difference was observed between the Sysmon `UtcTime` field and the local Event Viewer `Logged` time. Time synchronization and timezone configuration should be verified before future timeline-heavy investigations. Analysts should normalize timestamps before correlating events from multiple systems.
+During the exercise, Event Viewer initially appeared roughly three hours behind the host system. The Windows VM was configured for Pacific Time while the lab was operating in Eastern Time.
+
+The Windows time zone was corrected to:
+
+```text
+Eastern Standard Time
+```
+
+Windows was then synchronized through the Windows Time service. Verification showed a successful sync using `time.windows.com` as the time source.
+
+Kali was separately verified with `timedatectl` and showed:
+
+- Time zone: `America/New_York`
+- System clock synchronized: `yes`
+- NTP service: `active`
+
+### Analyst Lesson
+
+When timestamps appear wrong, verify time zone and synchronization before assuming the log itself is incorrect. Also distinguish local Event Viewer time from UTC fields recorded inside some events.
+
+## Step 5 — Cleanup
+
+The temporary firewall rule was removed after the exercise:
+
+```powershell
+Remove-NetFirewallRule -DisplayName "Lab TCP 8080 from Kali"
+```
+
+Cleanup was verified with:
+
+```powershell
+Get-NetFirewallRule -DisplayName "Lab TCP 8080 from Kali"
+```
+
+PowerShell returned that no matching firewall-rule object was found. In this context, that error is the expected result and confirms that the temporary rule no longer exists.
+
+### Why Cleanup Matters
+
+Temporary lab exceptions should be removed when they are no longer required. This reinforces a security principle: do not leave unnecessary firewall openings, services, or test configuration in place after an exercise is complete.
 
 ## Troubleshooting
 
@@ -198,3 +234,6 @@ If the connection fails:
 10. Why should an analyst reject unrelated Event ID 3 entries instead of assuming the first one is relevant?
 11. What three pieces of evidence were correlated to prove the connection?
 12. Why should timestamps be normalized during an investigation?
+13. What caused the three-hour timestamp discrepancy?
+14. Why did the `Get-NetFirewallRule` error confirm successful cleanup?
+15. Why should temporary firewall rules be removed after testing?
