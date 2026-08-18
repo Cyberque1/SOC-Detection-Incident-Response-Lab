@@ -1,18 +1,18 @@
 # Cybersecurity Home Lab
 
-A hands-on Blue Team / SOC cybersecurity home lab built to practice endpoint monitoring, Windows event analysis, Sysmon telemetry, TCP/IP networking, controlled adversary simulation, and incident investigation.
+A hands-on Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, and multi-source security-event correlation.
 
-> **Status:** Active build. This repository is being documented alongside the hands-on lab so each exercise produces both technical evidence and a repeatable study procedure.
+## Project Goal
 
-## Lab Goal
+Build and investigate realistic, controlled security activity using a monitored Windows endpoint and a Kali Linux test system.
 
-The lab follows a simple analyst workflow:
+The analyst workflow used throughout the project is:
 
-**Generate activity → Collect telemetry → Investigate logs → Correlate events → Document findings**
+**Generate activity → Collect telemetry → Investigate → Correlate evidence → Document findings**
 
-Kali Linux is used as a controlled testing system to generate authorized activity against a monitored Windows endpoint. The Windows system is used to collect and analyze endpoint and security telemetry.
+All testing is performed in a personally controlled virtual lab.
 
-## Architecture
+## Lab Architecture
 
 ```text
                      MacBook Air M4
@@ -25,86 +25,73 @@ Kali Linux is used as a controlled testing system to generate authorized activit
         LAB-ENDPOINT-01         LAB-KALI-01
           Windows 11              Kali Linux
               |                        |
-            Sysmon              Test / Traffic
+     Windows Event Logs          Controlled tests
+            Sysmon               Nmap / Netcat
+     PowerShell logging
               |
-       Windows Event Logs
+              v
+       Detection & Analysis
 ```
 
-### Current Systems
-
-| System | Role | Current observed IP* |
+| System | Role | Lab IP |
 |---|---|---|
-| `LAB-ENDPOINT-01` | Monitored Windows endpoint | `192.168.64.2` |
-| `LAB-KALI-01` | Controlled test system | `192.168.64.3` |
+| `LAB-ENDPOINT-01` | Monitored Windows 11 endpoint | `192.168.64.2` |
+| `LAB-KALI-01` | Controlled traffic/test system | `192.168.64.3` |
 
-\*Virtual-machine addresses can change. IPs are verified before exercises that depend on them.
+## Portfolio Highlights
 
-## Work Completed to Date
+### Port-Scan Detection
+Generated a controlled Nmap SYN scan and detected the activity from the Windows defender perspective using Windows Firewall logs and Windows Filtering Platform events. Correlated a rapid one-to-many-port probe pattern across TCP ports `21, 22, 23, 80, 443, 445, 3389, 8080`.
 
-- Built a Windows 11 ARM64 endpoint in UTM
-- Built a Kali Linux ARM64 test VM
-- Configured the Windows endpoint hostname
-- Installed and configured Sysmon
-- Practiced Windows Security log analysis
-- Investigated Event ID `4624` — successful logon
-- Investigated Event ID `4625` — failed logon
-- Investigated Sysmon Event ID `1` — process creation
-- Introduced Sysmon Event ID `3` — network connection
-- Verified network connectivity between Kali and Windows
-- Began controlled Kali-to-Windows TCP testing
+[View investigation](docs/06-port-scan-detection.md)
+
+### Process-to-Network Correlation
+Correlated Sysmon Event ID `1` and Event ID `3` to connect a `curl.exe` process to an outbound HTTP connection. Used PID, destination, direction, command line, precise UTC timestamps, and an independent Kali HTTP log to reconstruct the activity.
+
+[View investigation](docs/07-process-network-correlation.md)
+
+### PowerShell Script Block Analysis
+Enabled PowerShell Script Block Logging and correlated Sysmon Event ID `1` with PowerShell Event ID `4104`. Demonstrated how Sysmon exposes `-EncodedCommand` while Event ID `4104` reveals the readable PowerShell code executed by the same process.
+
+[View investigation](docs/08-powershell-script-block-logging.md)
+
+### File Creation and Hash Analysis
+Expanded the Sysmon configuration to collect Event ID `11`, correlated process creation with file creation using PID and ProcessGuid, calculated a SHA-256 fingerprint, and demonstrated that renaming a file does not change its content hash.
+
+[View investigation](docs/09-file-creation-hashing.md)
 
 ## Skills Demonstrated
 
-- Windows Event Viewer
-- Windows Security event analysis
-- Sysmon telemetry analysis
-- TCP/IP fundamentals
-- Windows Firewall configuration
-- Process investigation
-- Network connection investigation
-- Security event correlation
-- Controlled lab testing
-- Technical documentation
+- Windows Event Viewer and Security log analysis
+- Sysmon configuration and telemetry analysis
+- Windows Filtering Platform event analysis
+- PowerShell Script Block Logging
+- Process and parent-child process analysis
+- TCP/IP and port-level traffic analysis
+- Nmap and Netcat in an authorized lab environment
+- Windows Firewall logging and policy inspection
+- Event correlation across multiple telemetry sources
+- Timeline reconstruction using UTC and local timestamps
+- SHA-256 hashing and file-artifact analysis
+- PowerShell-based log querying and structured XML parsing
+- Technical security documentation
 
-## Repository Structure
+## Investigations
 
-```text
-cybersecurity-home-lab/
-├── README.md
-├── docs/
-│   ├── 01-lab-architecture.md
-│   ├── 02-windows-event-logs.md
-│   ├── 03-sysmon-monitoring.md
-│   ├── 04-network-connectivity.md
-│   ├── 05-tcp-8080-investigation.md
-│   └── study-guide.md
-├── screenshots/
-├── scripts/
-├── configs/
-└── reports/
-```
+| Document | Focus |
+|---|---|
+| [01 — Lab Architecture](docs/01-lab-architecture.md) | Virtual environment, roles, and telemetry sources |
+| [02 — Windows Event Logs](docs/02-windows-event-logs.md) | Authentication-event analysis with 4624/4625 |
+| [03 — Sysmon Monitoring](docs/03-sysmon-monitoring.md) | Endpoint process and network telemetry |
+| [04 — Network Connectivity](docs/04-network-connectivity.md) | Network validation and host-role mapping |
+| [05 — TCP 8080 Investigation](docs/05-tcp-8080-investigation.md) | Inbound TCP connection and Sysmon Event ID 3 |
+| [06 — Port-Scan Detection](docs/06-port-scan-detection.md) | Nmap reconnaissance detection with WFP events |
+| [07 — Process-to-Network Correlation](docs/07-process-network-correlation.md) | Sysmon Event IDs 1 + 3 and timeline reconstruction |
+| [08 — PowerShell Script Block Logging](docs/08-powershell-script-block-logging.md) | Encoded PowerShell analysis with Event ID 4104 |
+| [09 — File Creation and Hashing](docs/09-file-creation-hashing.md) | Sysmon Event ID 11, ProcessGuid, and SHA-256 |
 
-## Documentation Approach
+## Security and Scope
 
-Each lab exercise is documented with:
+All activity documented here is generated inside an isolated, personally controlled lab for defensive learning and detection engineering practice.
 
-1. **Objective** — what the exercise is designed to teach
-2. **Why it matters** — how the skill applies to SOC / Blue Team work
-3. **Procedure** — commands and configuration steps
-4. **Expected result** — what successful execution should look like
-5. **Verification** — evidence that the activity occurred
-6. **Analyst interpretation** — what the telemetry means
-7. **Troubleshooting** — common problems and fixes
-8. **Memory recall** — questions used to reinforce retention
-
-## Current Exercise
-
-The current lab exercise is generating a controlled TCP connection from Kali Linux to the Windows endpoint on TCP port `8080`, then locating and interpreting the corresponding telemetry in Sysmon.
-
-See [`docs/05-tcp-8080-investigation.md`](docs/05-tcp-8080-investigation.md).
-
-## Safety and Scope
-
-All testing documented in this repository is performed in an isolated, personally controlled lab environment. Techniques are used for defensive learning, telemetry generation, and authorized security testing.
-
-Virtual machine images, credentials, secrets, private keys, tokens, and other sensitive files are not stored in this repository.
+Virtual machine images, credentials, secrets, private keys, tokens, and other sensitive material are not stored in this repository.
