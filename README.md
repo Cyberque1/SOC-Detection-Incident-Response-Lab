@@ -1,6 +1,6 @@
 # Cybersecurity Home Lab
 
-A hands-on Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, and multi-source security-event correlation.
+A hands-on Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, persistence analysis, and multi-source security-event correlation.
 
 ## Project Goal
 
@@ -60,12 +60,18 @@ Expanded the Sysmon configuration to collect Event ID `11`, correlated process c
 
 [View investigation](docs/09-file-creation-hashing.md)
 
+### Registry Persistence Detection
+Added targeted Sysmon registry monitoring for the Windows `Run` key, generated a benign startup entry, and correlated Sysmon Event ID `13` with Event ID `1` using PID and ProcessGuid to identify the process responsible for the persistence-related registry modification.
+
+[View investigation](docs/10-registry-persistence-detection.md)
+
 ## Skills Demonstrated
 
 - Windows Event Viewer and Security log analysis
 - Sysmon configuration and telemetry analysis
 - Windows Filtering Platform event analysis
 - PowerShell Script Block Logging
+- Windows registry and startup-persistence analysis
 - Process and parent-child process analysis
 - TCP/IP and port-level traffic analysis
 - Nmap and Netcat in an authorized lab environment
@@ -89,6 +95,7 @@ Expanded the Sysmon configuration to collect Event ID `11`, correlated process c
 | [07 — Process-to-Network Correlation](docs/07-process-network-correlation.md) | Sysmon Event IDs 1 + 3 and timeline reconstruction |
 | [08 — PowerShell Script Block Logging](docs/08-powershell-script-block-logging.md) | Encoded PowerShell analysis with Event ID 4104 |
 | [09 — File Creation and Hashing](docs/09-file-creation-hashing.md) | Sysmon Event ID 11, ProcessGuid, and SHA-256 |
+| [10 — Registry Persistence Detection](docs/10-registry-persistence-detection.md) | Sysmon Event ID 13 and process-to-registry correlation |
 
 ## Security and Scope
 
