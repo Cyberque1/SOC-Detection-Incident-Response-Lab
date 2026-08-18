@@ -76,6 +76,11 @@ Validated Microsoft Defender Real-Time Protection with a benign EICAR test artif
 
 [View investigation](docs/12-defender-detection-triage.md)
 
+### Scheduled Task Persistence Detection
+Enabled the Windows audit policy required for scheduled-task creation telemetry, compared failed medium-integrity and successful high-integrity `schtasks.exe` activity, and correlated Sysmon Event ID `1` with Windows Security Event ID `4698` for a logon-triggered task.
+
+[View investigation](docs/13-scheduled-task-persistence-detection.md)
+
 ## Skills Demonstrated
 
 - Windows Event Viewer and Security log analysis
@@ -84,6 +89,9 @@ Validated Microsoft Defender Real-Time Protection with a benign EICAR test artif
 - Windows Filtering Platform event analysis
 - PowerShell Script Block Logging
 - Windows registry and startup-persistence analysis
+- Scheduled-task persistence analysis
+- Windows advanced audit-policy configuration and validation
+- Process privilege and integrity-level comparison
 - DNS-query and resolution analysis
 - Process and parent-child process analysis
 - TCP/IP and port-level traffic analysis
@@ -112,6 +120,7 @@ Validated Microsoft Defender Real-Time Protection with a benign EICAR test artif
 | [10 — Registry Persistence Detection](docs/10-registry-persistence-detection.md) | Sysmon Event ID 13 and process-to-registry correlation |
 | [11 — DNS Query Correlation](docs/11-dns-query-correlation.md) | Sysmon Event ID 22 and process-to-DNS correlation |
 | [12 — Defender Detection and Triage](docs/12-defender-detection-triage.md) | Defender 1116/1117 with Sysmon process/file correlation |
+| [13 — Scheduled Task Persistence Detection](docs/13-scheduled-task-persistence-detection.md) | Security 4698, Sysmon process telemetry, and privilege comparison |
 
 ## Security and Scope
 
