@@ -39,6 +39,10 @@ Network connection telemetry. Useful fields include:
 - `DestinationIp`
 - `DestinationPort`
 
+### PowerShell Event ID 4104
+
+PowerShell Script Block Logging. Useful for seeing the PowerShell code that actually executed, including readable script content associated with an encoded or dynamically constructed command.
+
 ### Windows Filtering Platform Event ID 5152
 
 Windows Filtering Platform blocked a packet.
@@ -312,6 +316,83 @@ A PowerShell XML query was used to extract fields directly from Sysmon records i
 
 ---
 
+# Lab 8 — PowerShell Script Block Logging
+
+The goal was to compare **process telemetry** with **PowerShell code telemetry**.
+
+## Script Block Logging
+
+The PowerShell Operational log was enabled, but the full Script Block Logging policy was initially not configured. The policy was enabled by setting:
+
+```text
+EnableScriptBlockLogging = 1
+```
+
+Afterward, Event ID `4104` reliably captured benign test script blocks.
+
+## First Marker Correlation
+
+A normal PowerShell session launched a child PowerShell process containing `LAB8-4104-TEST`.
+
+Sysmon Event ID `1` showed:
+
+- child PID `972`
+- parent PID `8000`
+- `powershell.exe`
+- command line containing the marker
+- `IntegrityLevel: Medium`
+
+PowerShell Event ID `4104` showed:
+
+- `ProcessID: 972`
+- readable script block containing `LAB8-4104-TEST`
+
+The same PID directly correlated process creation to executed PowerShell code.
+
+## Encoded Command Correlation
+
+A harmless Base64-encoded PowerShell command was launched with `-EncodedCommand`.
+
+Sysmon Event ID `1` showed:
+
+- child PID `3724`
+- parent PID `9320`
+- `powershell.exe`
+- `-EncodedCommand` plus Base64 data
+- `IntegrityLevel: Medium`
+
+PowerShell Event ID `4104` for the same PID `3724` revealed the readable code:
+
+```powershell
+$encodedMarker="LAB8-ENCODED-TEST"; Write-Output $encodedMarker
+```
+
+### Key Analyst Lesson
+
+```text
+Sysmon Event ID 1
+        ↓
+process + command line + parent + user + integrity
+
+PowerShell Event ID 4104
+        ↓
+PowerShell code that actually executed
+```
+
+For encoded PowerShell, Sysmon can show that `-EncodedCommand` was used while 4104 can expose the readable script content.
+
+Base64 is **encoding, not encryption**, and encoded PowerShell is **not automatically malicious**. It is a reason to investigate context such as the decoded code, parent process, user, integrity level, network behavior, persistence, and follow-on activity.
+
+### Permissions Lesson
+
+The normal PowerShell session could query the PowerShell Operational log but could not read the protected Sysmon Operational log. Sysmon investigation therefore required Administrator PowerShell, while the generated test activity remained non-elevated.
+
+### Integrity Lesson
+
+`IntegrityLevel: Medium` confirmed the Lab 8 child PowerShell processes ran as normal user processes. Earlier Lab 7 activity had shown `High` integrity because PowerShell had unintentionally been opening elevated before UAC was corrected.
+
+---
+
 # Time Synchronization Lesson
 
 The Windows VM initially appeared three hours behind because it was configured for Pacific Time while the lab was operating in Eastern Time.
@@ -460,35 +541,43 @@ Try answering without looking at the notes.
 2. What does Windows Event ID `4625` mean?
 3. What does Sysmon Event ID `1` record?
 4. What does Sysmon Event ID `3` record?
-5. What does WFP Event ID `5152` mean?
-6. What does WFP Event ID `5157` mean?
-7. What protocol does ping use?
-8. Why does successful ping not prove a TCP port is reachable?
-9. What does `Initiated: true` mean?
-10. What does `Initiated: false` mean?
-11. What is an ephemeral source port?
-12. What does Nmap `-sS` do?
-13. What does Nmap `-Pn` do?
-14. What does `filtered` mean in Nmap output?
-15. What did the `S` flag mean in the firewall log?
-16. Why was `pfirewall.log` alone insufficient to prove all eight scan probes were logged?
-17. What pattern made the WFP records consistent with port scanning?
-18. Why should one isolated blocked packet not automatically be labeled a scan?
-19. In Lab 7, what process launched `curl.exe`?
-20. What was the `curl.exe` PID?
-21. What did its command line reveal?
-22. What destination did `curl.exe` contact?
-23. What did HTTP status `200` prove?
-24. Why could the Event ID 3 `ProcessGuid` not be used in Lab 7?
-25. Which other fields allowed the two Sysmon events to be correlated anyway?
-26. Approximately how far apart were Event ID 1 and Event ID 3 using Sysmon `UtcTime`?
-27. Why can payload time be more useful than Event Viewer display time?
-28. Why are structured XML event fields useful during an investigation?
-29. What command verifies that Kali is actually listening on TCP `8080`?
-30. What troubleshooting sequence should you use when ping works but an application connection fails?
-31. Why should analysts correlate multiple telemetry sources?
-32. What caused the Windows VM to appear three hours behind earlier in the lab?
-33. Why must clocks be synchronized before building multi-system timelines?
+5. What does PowerShell Event ID `4104` record?
+6. What does WFP Event ID `5152` mean?
+7. What does WFP Event ID `5157` mean?
+8. What protocol does ping use?
+9. Why does successful ping not prove a TCP port is reachable?
+10. What does `Initiated: true` mean?
+11. What does `Initiated: false` mean?
+12. What is an ephemeral source port?
+13. What does Nmap `-sS` do?
+14. What does Nmap `-Pn` do?
+15. What does `filtered` mean in Nmap output?
+16. What did the `S` flag mean in the firewall log?
+17. Why was `pfirewall.log` alone insufficient to prove all eight scan probes were logged?
+18. What pattern made the WFP records consistent with port scanning?
+19. Why should one isolated blocked packet not automatically be labeled a scan?
+20. In Lab 7, what process launched `curl.exe`?
+21. What was the `curl.exe` PID?
+22. What did its command line reveal?
+23. What destination did `curl.exe` contact?
+24. What did HTTP status `200` prove?
+25. Why could the Event ID 3 `ProcessGuid` not be used in Lab 7?
+26. Which other fields allowed the two Sysmon events to be correlated anyway?
+27. Approximately how far apart were Event ID 1 and Event ID 3 using Sysmon `UtcTime`?
+28. Why can payload time be more useful than Event Viewer display time?
+29. Why are structured XML event fields useful during an investigation?
+30. What command verifies that Kali is actually listening on TCP `8080`?
+31. What troubleshooting sequence should you use when ping works but an application connection fails?
+32. Why should analysts correlate multiple telemetry sources?
+33. What caused the Windows VM to appear three hours behind earlier in the lab?
+34. Why must clocks be synchronized before building multi-system timelines?
+35. In Lab 8, what PID correlated the first script-block test across Sysmon and Event ID 4104?
+36. What PID correlated the encoded-command test across Sysmon and Event ID 4104?
+37. What did `IntegrityLevel: Medium` tell us about the Lab 8 PowerShell processes?
+38. Why is `-EncodedCommand` a useful detection signal but not proof of malicious activity?
+39. Why is Base64 encoding not the same as encryption?
+40. Which event source exposed the readable contents of the encoded PowerShell command?
+41. Why did the normal PowerShell session need an elevated analyst session to read Sysmon telemetry?
 
 ## Recall Goal
 
