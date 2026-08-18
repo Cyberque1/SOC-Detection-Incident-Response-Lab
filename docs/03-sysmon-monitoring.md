@@ -1,16 +1,21 @@
-# Sysmon Monitoring
+# Sysmon Endpoint Monitoring
 
 ## Objective
 
-Use Sysmon telemetry to investigate process and network activity on the Windows endpoint.
+Use Sysmon to collect higher-fidelity Windows endpoint telemetry and support process, network, DNS, and file-based investigations.
 
-## What Sysmon Does
+## Current Configuration
 
-Sysmon (System Monitor) records detailed Windows endpoint activity that can support security investigations. It does not automatically decide whether activity is malicious; analysts interpret the telemetry in context.
+The active Sysmon configuration on `LAB-ENDPOINT-01` uses SHA-256 hashing and collects these event categories:
 
-## Event ID 1 — Process Creation
+- `ProcessCreate`
+- `NetworkConnect`
+- `DnsQuery`
+- `FileCreate`
 
-Sysmon Event ID `1` records a process being created.
+## Key Event IDs
+
+### Event ID 1 — Process Create
 
 Useful fields include:
 
@@ -18,50 +23,63 @@ Useful fields include:
 - `CommandLine`
 - `ParentImage`
 - `User`
+- `IntegrityLevel`
 - `ProcessId`
-- `ParentProcessId`
-- Hash information when configured
+- `ProcessGuid`
+- executable hashes
 
-### Analyst Interpretation
+This telemetry supports parent-child process analysis and helps distinguish a normal executable name from a suspicious invocation or command line.
 
-The process name alone is often insufficient. Command-line arguments and parent-child process relationships provide important context.
-
-Example:
-
-```text
-powershell.exe
-```
-
-is less informative than a full command line showing exactly how PowerShell was launched and what it executed.
-
-## Event ID 3 — Network Connection
-
-Sysmon Event ID `3` records network connection telemetry when enabled by the Sysmon configuration.
+### Event ID 3 — Network Connection
 
 Useful fields include:
 
-- `Image`
-- `User`
-- `Protocol`
-- `SourceIp`
-- `SourcePort`
-- `DestinationIp`
-- `DestinationPort`
+- process identity
+- protocol
+- `Initiated`
+- source IP/port
+- destination IP/port
 
-## Basic Investigation Method
+This supports process-to-network correlation and direction analysis.
 
-1. Identify the timestamp.
-2. Identify the host.
-3. Identify the user.
-4. Identify the process.
-5. Identify source and destination network information.
-6. Determine the result or behavior.
-7. Correlate related events into a timeline.
+### Event ID 11 — File Create
 
-## Memory Recall
+Useful fields include:
 
-1. What does Sysmon Event ID 1 record?
-2. What does Sysmon Event ID 3 record?
-3. Why can the `CommandLine` field be more useful than the process name?
-4. What fields would you inspect when analyzing a network connection?
-5. Does Sysmon itself determine whether an event is malicious?
+- creating process
+- `ProcessId`
+- `ProcessGuid`
+- `TargetFilename`
+- user
+- event timestamp
+
+This enables direct correlation between a running process and a file artifact it created.
+
+## Investigation Method
+
+```text
+Identify event
+      ↓
+Extract process/user/time fields
+      ↓
+Inspect command line or network/file fields
+      ↓
+Correlate by PID / ProcessGuid / timestamp
+      ↓
+Validate with another telemetry source
+      ↓
+Document finding
+```
+
+## Analyst Perspective
+
+Sysmon provides telemetry, not a verdict. A process, network connection, or file creation must be interpreted in context and correlated with other evidence before activity is labeled benign or suspicious.
+
+## Skills Demonstrated
+
+- Sysmon deployment and configuration
+- Endpoint telemetry analysis
+- Parent-child process investigation
+- PID and ProcessGuid correlation
+- Network and file artifact analysis
+- SHA-256 process hashing
