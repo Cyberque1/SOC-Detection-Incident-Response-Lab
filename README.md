@@ -1,6 +1,6 @@
 # Cybersecurity Home Lab
 
-A hands-on Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, persistence analysis, DNS investigation, and multi-source security-event correlation.
+A hands-on Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, persistence analysis, DNS investigation, Microsoft Defender alert triage, and multi-source security-event correlation.
 
 ## Project Goal
 
@@ -28,6 +28,7 @@ All testing is performed in a personally controlled virtual lab.
      Windows Event Logs          Controlled tests
             Sysmon               Nmap / Netcat
      PowerShell logging
+     Microsoft Defender
               |
               v
        Detection & Analysis
@@ -70,10 +71,16 @@ Captured a controlled DNS lookup with Sysmon Event ID `22` and correlated it wit
 
 [View investigation](docs/11-dns-query-correlation.md)
 
+### Microsoft Defender Alert Triage
+Validated Microsoft Defender Real-Time Protection with a benign EICAR test artifact, analyzed Defender Event IDs `1116` and `1117`, and correlated the detection and successful quarantine with Sysmon process and file-creation telemetry.
+
+[View investigation](docs/12-defender-detection-triage.md)
+
 ## Skills Demonstrated
 
 - Windows Event Viewer and Security log analysis
 - Sysmon configuration and telemetry analysis
+- Microsoft Defender Antivirus alert and remediation analysis
 - Windows Filtering Platform event analysis
 - PowerShell Script Block Logging
 - Windows registry and startup-persistence analysis
@@ -86,6 +93,7 @@ Captured a controlled DNS lookup with Sysmon Event ID `22` and correlated it wit
 - Timeline reconstruction using UTC and local timestamps
 - SHA-256 hashing and file-artifact analysis
 - PowerShell-based log querying and structured XML parsing
+- SOC alert triage and disposition
 - Technical security documentation
 
 ## Investigations
@@ -103,6 +111,7 @@ Captured a controlled DNS lookup with Sysmon Event ID `22` and correlated it wit
 | [09 — File Creation and Hashing](docs/09-file-creation-hashing.md) | Sysmon Event ID 11, ProcessGuid, and SHA-256 |
 | [10 — Registry Persistence Detection](docs/10-registry-persistence-detection.md) | Sysmon Event ID 13 and process-to-registry correlation |
 | [11 — DNS Query Correlation](docs/11-dns-query-correlation.md) | Sysmon Event ID 22 and process-to-DNS correlation |
+| [12 — Defender Detection and Triage](docs/12-defender-detection-triage.md) | Defender 1116/1117 with Sysmon process/file correlation |
 
 ## Security and Scope
 
