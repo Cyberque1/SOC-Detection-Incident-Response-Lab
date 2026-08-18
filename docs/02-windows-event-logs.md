@@ -1,60 +1,52 @@
-# Windows Event Log Analysis
+# Windows Authentication Event Analysis
 
 ## Objective
 
-Practice reading Windows Security logs and interpreting successful and failed authentication events.
+Analyze Windows Security authentication events and use event sequence, account, source, and timing context to distinguish normal activity from activity that warrants investigation.
 
-## Event ID 4624 — Successful Logon
+## Telemetry Reviewed
 
-Windows Security Event ID `4624` indicates that an account successfully logged on.
+### Event ID 4624 — Successful Logon
 
-When reviewing the event, identify:
+A `4624` event records a successful Windows logon. Fields of interest include:
 
-- Timestamp
-- Account name
-- Logon type
-- Source system or network information when available
-- Whether the authentication was expected
+- timestamp
+- account name
+- logon type
+- source/network information when available
+- target system
 
-### Analyst Question
+### Event ID 4625 — Failed Logon
 
-A successful login is not automatically benign. Determine whether it followed suspicious failed attempts or occurred from an unexpected source.
+A `4625` event records a failed Windows logon. Potential causes range from user error or stale credentials to password guessing and brute-force activity.
 
-## Event ID 4625 — Failed Logon
+## Investigation Approach
 
-Windows Security Event ID `4625` indicates that an account failed to log on.
-
-Potential explanations include:
-
-- Mistyped password
-- Expired or incorrect credentials
-- Misconfigured application or service
-- Password guessing
-- Brute-force activity
-
-### Investigation Pattern
+The analysis focused on sequence and context rather than treating one event as a verdict:
 
 ```text
-Repeated 4625 events
-        |
-        v
-Identify source/user/time pattern
-        |
-        v
-Look for subsequent 4624
-        |
-        v
-Determine whether access eventually succeeded
+Repeated 4625 failures
+        ↓
+Identify user + source + timing pattern
+        ↓
+Search for a subsequent 4624
+        ↓
+Determine whether authentication eventually succeeded
 ```
 
-## Why Correlation Matters
+A successful logon is not automatically benign, and a failed logon is not automatically malicious. The surrounding pattern determines investigative priority.
 
-A single failed login may be normal. Multiple failures followed by a successful login can tell a much different story. Analysts correlate events to reconstruct the sequence rather than making a decision from one record.
+## Findings
 
-## Memory Recall
+- Event ID `4624` was identified and interpreted as successful authentication telemetry.
+- Event ID `4625` was identified and interpreted as failed authentication telemetry.
+- Authentication events were evaluated as part of a timeline rather than as isolated records.
+- The exercise established the basis for investigating repeated failures followed by successful access.
 
-1. What does Event ID 4624 represent?
-2. What does Event ID 4625 represent?
-3. Why might repeated 4625 events deserve investigation?
-4. Why should you search for a 4624 after a series of 4625 events?
-5. What additional fields would help determine whether an authentication event is suspicious?
+## Skills Demonstrated
+
+- Windows Security log analysis
+- Authentication-event triage
+- Event ID interpretation
+- Timeline and sequence analysis
+- Context-based security investigation
