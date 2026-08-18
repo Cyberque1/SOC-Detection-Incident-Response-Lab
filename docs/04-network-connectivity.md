@@ -1,79 +1,54 @@
-# Network Connectivity Verification
+# Network Connectivity Validation
 
 ## Objective
 
-Verify that the Kali Linux and Windows virtual machines can communicate before running security exercises that depend on network traffic.
+Validate network communication between the monitored Windows endpoint and the Kali test system before performing traffic-based security investigations.
 
-## Current Lab Systems
+## Environment
 
-- Windows endpoint: `LAB-ENDPOINT-01`
-- Kali test system: `LAB-KALI-01`
+- `LAB-ENDPOINT-01` — Windows 11 — `192.168.64.2`
+- `LAB-KALI-01` — Kali Linux — `192.168.64.3`
+- Virtual network — `192.168.64.0/24`
 
-Current observed IP addresses:
+## Validation
 
-- Windows: `192.168.64.2`
-- Kali: `192.168.64.3`
+Host addressing was verified with `ipconfig` on Windows and `ip addr` on Kali. ICMP connectivity was then tested in both directions.
 
-## Verify Windows Address
-
-```powershell
-ipconfig
+```text
+LAB-KALI-01  192.168.64.3
+        ↕ ICMP
+LAB-ENDPOINT-01  192.168.64.2
 ```
 
-## Verify Kali Address
-
-```bash
-ip addr
-```
-
-## Test Connectivity
-
-From Kali:
-
-```bash
-ping 192.168.64.2
-```
-
-From Windows:
-
-```powershell
-ping 192.168.64.3
-```
-
-## What Ping Proves
-
-Ping uses ICMP and verifies basic IP reachability between systems.
-
-A successful ping does **not** prove that a particular TCP or UDP service is open. Service-specific connectivity must be tested separately.
+Successful ping confirmed basic IP reachability between the two VMs.
 
 ## Analyst Interpretation
 
-Before investigating network activity, identify which address belongs to which host. This makes traffic such as:
+ICMP reachability confirms that the systems can communicate at the IP layer, but it does **not** prove that a TCP or UDP application service is listening or reachable. Later investigations therefore used service-specific tests such as Netcat, HTTP, and Nmap in addition to ping.
+
+Mapping IP addresses back to system roles also makes network telemetry immediately actionable:
 
 ```text
-192.168.64.3 -> 192.168.64.2
+192.168.64.3 → 192.168.64.2
 ```
 
-readable as:
+becomes:
 
 ```text
-LAB-KALI-01 -> LAB-ENDPOINT-01
+LAB-KALI-01 → LAB-ENDPOINT-01
 ```
 
-## Troubleshooting
+## Findings
 
-If ping fails, check:
+- Both systems were attached to the intended virtual network.
+- Bidirectional IP reachability was established.
+- The system-to-IP mapping was documented for later event correlation.
+- The distinction between host reachability and application-port reachability was validated.
 
-1. Both VMs are running.
-2. Both systems have valid addresses.
-3. Both VMs are attached to the intended UTM network.
-4. Local firewall rules permit the traffic being tested.
-5. The destination IP has not changed since the previous session.
+## Skills Demonstrated
 
-## Memory Recall
-
-1. What protocol does ping use?
-2. What does a successful ping prove?
-3. What does it *not* prove?
-4. Why should you verify IP addresses at the beginning of a session?
-5. Which system is the source when Kali pings Windows?
+- TCP/IP fundamentals
+- Windows and Linux network inspection
+- ICMP connectivity testing
+- Host/IP role mapping
+- Network troubleshooting methodology
