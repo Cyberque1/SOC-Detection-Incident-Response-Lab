@@ -284,9 +284,22 @@ Changing the filename did not change the file contents, so the content hash rema
 
 This demonstrates why hashes are stronger than filenames when identifying exact file content.
 
+## Cleanup — Verified
+
+The temporary Lab 9 artifact and its test directory were removed from normal PowerShell:
+
+```powershell
+Remove-Item "$env:USERPROFILE\Documents\CyberLab\Lab9\renamed-lab9-file.txt"
+Remove-Item "$env:USERPROFILE\Documents\CyberLab\Lab9"
+```
+
+Both commands returned to the prompt without errors, confirming the temporary file and `Lab9` directory were removed successfully.
+
+The updated Sysmon `FileCreate` rule remains enabled for future endpoint telemetry, and `C:\Sysmon\sysmonconfig-backup.xml` is retained as the recovery copy of the earlier configuration.
+
 ## Final Analyst Finding
 
-A normal-user PowerShell process (`PID 9280`, `IntegrityLevel: Medium`) was launched by `explorer.exe`. Sysmon Event ID `11` recorded that same process creating `lab9-test.txt`. The process and file events were directly correlated with both `ProcessId` and `ProcessGuid`. The file's SHA-256 was calculated and remained unchanged after the file was renamed, demonstrating the difference between a filename and a content fingerprint.
+A normal-user PowerShell process (`PID 9280`, `IntegrityLevel: Medium`) was launched by `explorer.exe`. Sysmon Event ID `11` recorded that same process creating `lab9-test.txt`. The process and file events were directly correlated with both `ProcessId` and `ProcessGuid`. The file's SHA-256 was calculated and remained unchanged after the file was renamed, demonstrating the difference between a filename and a content fingerprint. Cleanup was verified after the investigation.
 
 ## Memory Recall
 
