@@ -249,6 +249,45 @@ Potential port-scanning / reconnaissance behavior
 
 A single blocked packet is not enough to conclude scanning. The conclusion comes from the combination of source consistency, multiple destination ports, timing, protocol, and repeated blocked probes.
 
+## Step 10 — Cleanup and Verification
+
+The temporary auditing and firewall logging used for this exercise were disabled after the investigation.
+
+```powershell
+auditpol /set /category:"System" /subcategory:"Filtering Platform Packet Drop" /success:disable /failure:disable
+```
+
+```powershell
+auditpol /set /category:"System" /subcategory:"Filtering Platform Connection" /success:disable /failure:disable
+```
+
+```powershell
+Set-NetFirewallProfile -Name Public -LogBlocked False
+```
+
+Verification commands:
+
+```powershell
+auditpol /get /subcategory:"Filtering Platform Packet Drop"
+```
+
+```powershell
+auditpol /get /subcategory:"Filtering Platform Connection"
+```
+
+```powershell
+Get-NetFirewallProfile -Name Public | Select-Object Name, Enabled, LogBlocked
+```
+
+Verified cleanup state:
+
+- `Filtering Platform Packet Drop: No Auditing`
+- `Filtering Platform Connection: No Auditing`
+- Windows Firewall Public profile: `Enabled = True`
+- Blocked-packet logging: `LogBlocked = False`
+
+This confirms that the temporary telemetry settings were removed while Windows Firewall itself remained enabled.
+
 ## Key Lessons
 
 1. Nmap's `filtered` result should be interpreted together with defender telemetry.
@@ -257,6 +296,7 @@ A single blocked packet is not enough to conclude scanning. The conclusion comes
 4. Event correlation is stronger than relying on one record.
 5. A rapid one-to-many-port pattern from the same source can indicate reconnaissance.
 6. Analysts should verify the exact ports and timestamps instead of assuming that every generated probe was logged.
+7. Temporary audit and logging changes should be reverted and verified after the exercise.
 
 ## Memory Recall
 
@@ -275,3 +315,5 @@ A single blocked packet is not enough to conclude scanning. The conclusion comes
 13. Why are source IP, destination ports, and timing more useful together than separately?
 14. Why can a temporary source port change between probes?
 15. Why should an analyst avoid labeling one isolated blocked packet as a port scan?
+16. Why did we disable WFP auditing and blocked-packet logging after the exercise?
+17. What verification proved that Windows Firewall itself remained enabled after cleanup?
