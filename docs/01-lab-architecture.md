@@ -2,87 +2,75 @@
 
 ## Objective
 
-Document the current cybersecurity home lab architecture and define the role of each virtual machine.
+Design a small Blue Team / SOC lab that separates a monitored Windows endpoint from a controlled Kali Linux testing system and provides multiple telemetry sources for investigation.
 
-## Host System
+## Environment
 
-- Apple Silicon MacBook Air M4
-- 16 GB RAM
-- UTM virtualization platform
+- **Host:** Apple Silicon MacBook Air M4, 16 GB RAM
+- **Hypervisor:** UTM
+- **Endpoint:** `LAB-ENDPOINT-01` — Windows 11 ARM64
+- **Test system:** `LAB-KALI-01` — Kali Linux ARM64
+- **Virtual network:** `192.168.64.0/24`
 
-## Virtual Machines
+Current lab addressing:
 
-### LAB-ENDPOINT-01
+| System | Role | IP |
+|---|---|---|
+| `LAB-ENDPOINT-01` | Monitored endpoint | `192.168.64.2` |
+| `LAB-KALI-01` | Controlled traffic generator | `192.168.64.3` |
 
-- Operating system: Windows 11 ARM64
-- Role: Monitored endpoint / simulated corporate workstation
-- Current observed lab IP: `192.168.64.2`
-- Security telemetry: Windows Event Logs and Sysmon
+## Architecture
 
-Primary uses:
+```text
+                     MacBook Air M4
+                          |
+                         UTM
+                          |
+                 Virtual Lab Network
+                    /             \
+                   /               \
+        LAB-ENDPOINT-01         LAB-KALI-01
+          Windows 11              Kali Linux
+              |                        |
+      Windows Event Logs        Authorized testing
+            Sysmon               Nmap / Netcat
+      PowerShell logging
+              |
+              v
+       Detection & Analysis
+```
 
-- Authentication-event analysis
-- Process creation analysis
-- Network connection analysis
-- Windows Firewall practice
-- Incident investigation
+## Telemetry Sources
 
-### LAB-KALI-01
+The Windows endpoint provides:
 
-- Operating system: Kali Linux ARM64
-- Role: Controlled testing system
-- Current observed lab IP: `192.168.64.3`
+- Windows Security logs
+- Sysmon process, network, DNS, and file-creation telemetry
+- PowerShell Operational logs / Event ID `4104`
+- Windows Firewall logs
+- Windows Filtering Platform Security events
 
-Primary uses:
-
-- Generate authorized network traffic
-- Test connectivity and exposed services
-- Produce activity for detection and investigation exercises
+The Kali VM is used only to generate controlled activity such as connectivity tests, TCP connections, HTTP requests, and limited Nmap scans.
 
 ## Analyst Workflow
 
 ```text
-LAB-KALI-01
-    |
-    | controlled activity
-    v
-LAB-ENDPOINT-01
-    |
-    | Windows + Sysmon telemetry
-    v
-Event investigation
-    |
-    v
-Analyst findings
+Controlled activity
+        ↓
+Endpoint telemetry
+        ↓
+Log filtering and field extraction
+        ↓
+Cross-source event correlation
+        ↓
+Analyst finding
 ```
 
-## Why This Matters
+## Skills Demonstrated
 
-SOC analysts rarely investigate a log entry in isolation. They need to understand the systems involved, their roles, network relationships, and which telemetry sources can prove what happened.
-
-## Verification Commands
-
-Windows hostname:
-
-```powershell
-hostname
-```
-
-Windows network configuration:
-
-```powershell
-ipconfig
-```
-
-Kali network configuration:
-
-```bash
-ip addr
-```
-
-## Memory Recall
-
-1. Which machine is the monitored endpoint?
-2. Which machine generates controlled testing activity?
-3. Why should IP addresses be verified before a lab exercise?
-4. What telemetry sources are currently available on the Windows endpoint?
+- Virtual lab architecture
+- Windows and Linux system administration
+- Network-role mapping
+- Defensive telemetry planning
+- Separation of test-generation and monitored systems
+- Security-event correlation design
