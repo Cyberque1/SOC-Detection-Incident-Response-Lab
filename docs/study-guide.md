@@ -20,6 +20,14 @@ Process creation.
 
 Network connection telemetry.
 
+### Windows Filtering Platform Event ID 5152
+
+Windows Filtering Platform blocked a packet.
+
+### Windows Filtering Platform Event ID 5157
+
+Windows Filtering Platform blocked a connection.
+
 ### Ping
 
 Uses ICMP to test basic IP reachability.
@@ -35,6 +43,14 @@ Identifies the application or service endpoint involved in TCP/UDP communication
 ### TCP Listener
 
 A process that waits on a specific TCP port for incoming connection attempts.
+
+### TCP SYN
+
+A SYN is the first control flag normally used when attempting to establish a TCP connection. In the firewall log, the `S` flag showed that the observed Nmap probes were SYN packets.
+
+### Nmap `filtered`
+
+`filtered` means Nmap could not determine whether a port was open or closed because the probe did not receive the normal response needed to make that distinction. Defender-side logs should be checked to understand what happened to the traffic.
 
 ### Ephemeral Source Port
 
@@ -57,10 +73,11 @@ When reviewing a security event, ask:
 4. Which process was involved?
 5. What source and destination systems were involved?
 6. What protocol and ports were used?
-7. Did the action succeed or fail?
+7. Did the action succeed, fail, or get blocked?
 8. Which side initiated the connection?
-9. What other events correlate with it?
-10. What conclusion does the combined evidence support?
+9. Is there a repeated pattern across multiple ports or events?
+10. What other telemetry sources correlate with it?
+11. What conclusion does the combined evidence support?
 
 ## TCP 8080 Exercise — Verified Evidence
 
@@ -110,6 +127,99 @@ The connection was confirmed using three observations:
 3. Sysmon Event ID `3` recorded the matching network telemetry.
 
 This is a basic example of event correlation.
+
+## Port-Scan Detection Exercise — Verified Evidence
+
+Kali generated a controlled SYN scan against the Windows lab endpoint:
+
+```bash
+sudo nmap -Pn -sS -p 21,22,23,80,443,445,3389,8080 192.168.64.2
+```
+
+All eight ports were reported by Nmap as `filtered`.
+
+### Firewall Log Evidence
+
+Windows Firewall blocked-packet logging was enabled on the active Public profile. The basic `pfirewall.log` visibly recorded dropped SYN probes from Kali to Windows port `445`.
+
+One log line could be interpreted as:
+
+```text
+DROP TCP 192.168.64.3 192.168.64.2 <ephemeral-port> 445 ... S ...
+```
+
+- `DROP` — blocked by the firewall
+- `TCP` — protocol
+- `192.168.64.3` — Kali source
+- `192.168.64.2` — Windows destination
+- `445` — destination port
+- `S` — SYN flag
+
+The basic firewall log did not visibly show all eight ports, so we did not assume complete visibility.
+
+### Windows Filtering Platform Evidence
+
+Additional auditing was enabled for:
+
+- `Filtering Platform Packet Drop`
+- `Filtering Platform Connection`
+
+After rerunning the same scan, Security events appeared at approximately `9:22:06–9:22:07 PM`.
+
+A full Event ID `5152` example showed:
+
+- Direction: `Inbound`
+- Source Address: `192.168.64.3`
+- Source Port: `59432`
+- Destination Address: `192.168.64.2`
+- Destination Port: `443`
+- Protocol: `6` (TCP)
+
+A PowerShell extraction of the WFP events confirmed Event ID `5152` for all eight scanned destination ports:
+
+- `21`
+- `22`
+- `23`
+- `80`
+- `443`
+- `445`
+- `3389`
+- `8080`
+
+Each appeared in the packet-block events during the scan window. In this capture, port `445` also produced Event ID `5157` blocked-connection events.
+
+### Detection Pattern
+
+```text
+192.168.64.3
+      |
+      +--> 21
+      +--> 22
+      +--> 23
+      +--> 80
+      +--> 443
+      +--> 445
+      +--> 3389
+      +--> 8080
+
+Multiple blocked TCP probes within ~1 second
+      ↓
+Consistent with controlled port-scanning / reconnaissance behavior
+```
+
+The conclusion did not come from one blocked packet. It came from the repeated pattern of one source probing multiple destination ports in a very short period and matching the known Nmap activity.
+
+### Multi-Source Correlation Lesson
+
+The scan was supported by:
+
+1. Nmap output on Kali
+2. Windows Firewall `DROP TCP` evidence
+3. Security Event ID `5152` across all eight ports
+4. Event ID `5157` for port 445 in this capture
+5. Matching timestamps
+
+One telemetry source may be incomplete. Analysts should correlate sources instead of assuming that a single log shows the entire event.
 
 ## Timestamp and Time Synchronization Lesson
 
@@ -226,10 +336,28 @@ TCP port test with Netcat:
 nc -vz <IP> <PORT>
 ```
 
+Controlled Nmap SYN scan:
+
+```bash
+sudo nmap -Pn -sS -p 21,22,23,80,443,445,3389,8080 192.168.64.2
+```
+
 Create the lab TCP 8080 firewall rule:
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lab TCP 8080 from Kali" -Direction Inbound -Protocol TCP -LocalPort 8080 -RemoteAddress 192.168.64.3 -Action Allow
+```
+
+Check Windows network profile:
+
+```powershell
+Get-NetConnectionProfile
+```
+
+Enable blocked-packet logging on the Public firewall profile:
+
+```powershell
+Set-NetFirewallProfile -Name Public -LogBlocked True
 ```
 
 Check Windows time zone:
@@ -272,26 +400,35 @@ Try answering these without looking at the documentation.
 4. What does Event ID `4625` mean?
 5. What does Sysmon Event ID `1` mean?
 6. What does Sysmon Event ID `3` mean?
-7. What protocol does ping use?
-8. Why does successful ping not prove TCP port `8080` is open?
-9. Why should an analyst correlate multiple events?
-10. Which fields would you inspect to explain a network connection?
-11. Why can command-line data be important during process analysis?
-12. Why are IP addresses re-verified before network exercises?
-13. What does `nc -vz <IP> <PORT>` do?
-14. Why should lab firewall rules be narrowly scoped?
-15. What evidence proved that Kali communicated with Windows?
-16. What did `Initiated: false` mean in our Sysmon event?
-17. Why was Kali's source port `37760` different from Windows destination port `8080`?
-18. How did we distinguish the correct Event ID 3 from unrelated background network events?
-19. What process owned the Windows listener?
-20. Why is timestamp normalization important during an investigation?
-21. What caused the Windows VM to appear three hours behind?
-22. What did `Source: Local CMOS Clock` tell us before synchronization?
-23. What command verifies the current Windows time source?
-24. What showed that Windows successfully synchronized after the resync?
-25. What does `System clock synchronized: yes` tell you on Kali?
-26. Why should both systems be time-synchronized before correlating events?
+7. What does WFP Event ID `5152` mean?
+8. What does WFP Event ID `5157` mean?
+9. What protocol does ping use?
+10. Why does successful ping not prove TCP port `8080` is open?
+11. Why should an analyst correlate multiple events?
+12. Which fields would you inspect to explain a network connection?
+13. Why can command-line data be important during process analysis?
+14. Why are IP addresses re-verified before network exercises?
+15. What does `nc -vz <IP> <PORT>` do?
+16. Why should lab firewall rules be narrowly scoped?
+17. What evidence proved that Kali communicated with Windows in the TCP 8080 exercise?
+18. What did `Initiated: false` mean in the Sysmon event?
+19. Why was Kali's source port `37760` different from Windows destination port `8080`?
+20. How did we distinguish the correct Event ID 3 from unrelated background network events?
+21. What process owned the Windows listener?
+22. What does Nmap `-sS` do?
+23. What does Nmap `-Pn` do?
+24. What does `filtered` mean in Nmap output?
+25. What did the `S` flag mean in the Windows Firewall log?
+26. Which eight destination ports were used in the controlled scan?
+27. Why did we enable WFP auditing after checking `pfirewall.log`?
+28. What pattern made the WFP events consistent with port scanning?
+29. Why should one isolated blocked packet not automatically be labeled a port scan?
+30. What caused the Windows VM to appear three hours behind?
+31. What did `Source: Local CMOS Clock` tell us before synchronization?
+32. What command verifies the current Windows time source?
+33. What showed that Windows successfully synchronized after the resync?
+34. What does `System clock synchronized: yes` tell you on Kali?
+35. Why should both systems be time-synchronized before correlating events?
 
 ## Recall Goal
 
