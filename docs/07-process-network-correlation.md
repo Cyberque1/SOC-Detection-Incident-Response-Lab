@@ -268,19 +268,27 @@ HTTP 200 success
 
 ## Cleanup
 
-Stop the temporary Kali HTTP server with:
+The temporary Kali HTTP server was stopped with:
 
 ```text
 Ctrl+C
 ```
 
-Verify the listener is gone:
+The listener was then verified with:
 
 ```bash
 ss -ltn | grep ':8080'
 ```
 
-No output indicates that the temporary listener is no longer active.
+### Verified Cleanup Result
+
+The final command returned **no output**, confirming that no TCP listener remained on port `8080` after the exercise.
+
+No permanent firewall rule was created for this lab.
+
+## Lab Status
+
+**Complete.** Process creation, network activity, external HTTP-server evidence, event correlation, troubleshooting, and cleanup were all verified.
 
 ## Memory Recall
 
@@ -301,3 +309,4 @@ No output indicates that the temporary listener is no longer active.
 15. What was the approximate time difference between Event ID 1 and Event ID 3 using Sysmon `UtcTime`?
 16. Why can event payload time be more useful than Event Viewer display time for precise correlation?
 17. Why should analysts correlate multiple fields instead of depending on one identifier?
+18. How did we verify that the temporary service was actually removed during cleanup?
