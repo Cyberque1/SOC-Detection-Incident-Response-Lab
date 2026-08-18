@@ -1,6 +1,6 @@
 # Cybersecurity Home Lab
 
-A hands-on Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, persistence analysis, and multi-source security-event correlation.
+A hands-on Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, persistence analysis, DNS investigation, and multi-source security-event correlation.
 
 ## Project Goal
 
@@ -65,6 +65,11 @@ Added targeted Sysmon registry monitoring for the Windows `Run` key, generated a
 
 [View investigation](docs/10-registry-persistence-detection.md)
 
+### DNS Query Correlation
+Captured a controlled DNS lookup with Sysmon Event ID `22` and correlated it with Event ID `1` using matching PID, ProcessGuid, process command line, user context, and timestamps only ~37 ms apart.
+
+[View investigation](docs/11-dns-query-correlation.md)
+
 ## Skills Demonstrated
 
 - Windows Event Viewer and Security log analysis
@@ -72,6 +77,7 @@ Added targeted Sysmon registry monitoring for the Windows `Run` key, generated a
 - Windows Filtering Platform event analysis
 - PowerShell Script Block Logging
 - Windows registry and startup-persistence analysis
+- DNS-query and resolution analysis
 - Process and parent-child process analysis
 - TCP/IP and port-level traffic analysis
 - Nmap and Netcat in an authorized lab environment
@@ -96,6 +102,7 @@ Added targeted Sysmon registry monitoring for the Windows `Run` key, generated a
 | [08 — PowerShell Script Block Logging](docs/08-powershell-script-block-logging.md) | Encoded PowerShell analysis with Event ID 4104 |
 | [09 — File Creation and Hashing](docs/09-file-creation-hashing.md) | Sysmon Event ID 11, ProcessGuid, and SHA-256 |
 | [10 — Registry Persistence Detection](docs/10-registry-persistence-detection.md) | Sysmon Event ID 13 and process-to-registry correlation |
+| [11 — DNS Query Correlation](docs/11-dns-query-correlation.md) | Sysmon Event ID 22 and process-to-DNS correlation |
 
 ## Security and Scope
 
