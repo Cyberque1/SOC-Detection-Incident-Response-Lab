@@ -1,10 +1,10 @@
 # Cybersecurity Home Lab
 
-A hands-on Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, persistence analysis, DNS investigation, Microsoft Defender alert triage, and multi-source security-event correlation.
+A hands-on Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, persistence analysis, DNS investigation, Microsoft Defender alert triage, centralized SIEM ingestion, and multi-source security-event correlation.
 
 ## Project Goal
 
-Build and investigate realistic, controlled security activity using a monitored Windows endpoint and a Kali Linux test system.
+Build and investigate realistic, controlled security activity using a monitored Windows endpoint, a Kali Linux test system, and a centralized Wazuh SIEM.
 
 The analyst workflow used throughout the project is:
 
@@ -15,29 +15,30 @@ All testing is performed in a personally controlled virtual lab.
 ## Lab Architecture
 
 ```text
-                     MacBook Air M4
-                          |
-                         UTM
-                          |
-                 Virtual Lab Network
-                    /             \
-                   /               \
-        LAB-ENDPOINT-01         LAB-KALI-01
-          Windows 11              Kali Linux
-              |                        |
-     Windows Event Logs          Controlled tests
-            Sysmon               Nmap / Netcat
-     PowerShell logging
-     Microsoft Defender
-              |
-              v
-       Detection & Analysis
+                         MacBook Air M4
+                              |
+                             UTM
+                              |
+                     Virtual Lab Network
+                   /           |           \
+                  /            |            \
+       LAB-ENDPOINT-01    LAB-WAZUH-01    LAB-KALI-01
+         Windows 11        Ubuntu/Wazuh      Kali Linux
+             |                  |                |
+    Windows Event Logs     Wazuh Manager   Controlled tests
+           Sysmon            Indexer       Nmap / Netcat
+    PowerShell logging       Dashboard
+    Microsoft Defender       Filebeat
+             |                  |
+             +-------> Centralized SIEM
+                         Detection & Analysis
 ```
 
 | System | Role | Lab IP |
 |---|---|---|
 | `LAB-ENDPOINT-01` | Monitored Windows 11 endpoint | `192.168.64.2` |
 | `LAB-KALI-01` | Controlled traffic/test system | `192.168.64.3` |
+| `LAB-WAZUH-01` | Wazuh SIEM server | `192.168.64.4` |
 
 ## Portfolio Highlights
 
@@ -81,8 +82,15 @@ Enabled the Windows audit policy required for scheduled-task creation telemetry,
 
 [View investigation](docs/13-scheduled-task-persistence-detection.md)
 
+### Wazuh SIEM and Centralized Telemetry
+Deployed a Wazuh SIEM server, enrolled the Windows endpoint, and centralized Sysmon, PowerShell, and Microsoft Defender telemetry. Enabled searchable raw-event archives and verified end-to-end ingestion using Sysmon Event ID `1`, PowerShell Event ID `4104`, and Defender Event IDs `1116/1117`.
+
+[View investigation](docs/14-wazuh-siem-centralized-telemetry.md)
+
 ## Skills Demonstrated
 
+- Wazuh SIEM deployment, agent enrollment, and centralized telemetry analysis
+- Raw-event indexing and threat hunting with Wazuh Discover
 - Windows Event Viewer and Security log analysis
 - Sysmon configuration and telemetry analysis
 - Microsoft Defender Antivirus alert and remediation analysis
@@ -121,6 +129,7 @@ Enabled the Windows audit policy required for scheduled-task creation telemetry,
 | [11 — DNS Query Correlation](docs/11-dns-query-correlation.md) | Sysmon Event ID 22 and process-to-DNS correlation |
 | [12 — Defender Detection and Triage](docs/12-defender-detection-triage.md) | Defender 1116/1117 with Sysmon process/file correlation |
 | [13 — Scheduled Task Persistence Detection](docs/13-scheduled-task-persistence-detection.md) | Security 4698, Sysmon process telemetry, and privilege comparison |
+| [14 — Wazuh SIEM and Centralized Telemetry](docs/14-wazuh-siem-centralized-telemetry.md) | Wazuh deployment, raw archives, and centralized Sysmon/PowerShell/Defender ingestion |
 
 ## Security and Scope
 
