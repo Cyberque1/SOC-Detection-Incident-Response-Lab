@@ -2,7 +2,7 @@
 
 ## Objective
 
-Generate a limited Nmap TCP SYN scan from Kali Linux and detect the reconnaissance pattern from the Windows defender perspective using firewall and Windows Filtering Platform telemetry.
+Generate a limited Nmap TCP SYN scan from Kali Linux and detect the reconnaissance pattern from the Windows endpoint perspective using firewall and Windows Filtering Platform telemetry.
 
 ## Environment and Tools
 
