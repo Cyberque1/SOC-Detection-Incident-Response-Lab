@@ -44,6 +44,10 @@ Sysmon Event ID `1` recorded a PowerShell child process launched with `-NoProfil
 - ParentProcessGuid: `{44acc921-1081-6a85-6202-000000001000}`
 - User: `LAB-ENDPOINT-01\User1`
 
+![Sysmon Event ID 1 showing PowerShell launched with EncodedCommand](../evidence/03-capstone-encoded-powershell.png)
+
+*Sysmon Event ID `1` showing the capstone PowerShell child process launched with `-EncodedCommand`, including process and integrity context used for correlation.*
+
 PowerShell Event ID `4104` exposed the readable script content, including the `LAB15-CAPSTONE` marker and the target path for `lab15-marker.txt`.
 
 ### 2. File-Creation Correlation
@@ -57,6 +61,10 @@ Sysmon Event ID `11` recorded creation of:
 - ProcessGuid: `{44acc921-108a-6a85-6602-000000001000}`
 - Image: `powershell.exe`
 - User: `LAB-ENDPOINT-01\User1`
+
+![Sysmon Event ID 11 showing lab15-marker.txt file creation by PID 10472](../evidence/04-capstone-file-creation.png)
+
+*Sysmon Event ID `11` showing `lab15-marker.txt` created by PID `10472`. The matching PID and ProcessGuid tie the artifact directly to the encoded PowerShell process.*
 
 The PID and ProcessGuid exactly matched the encoded PowerShell process. The file was created approximately 196 ms after process creation.
 
@@ -80,6 +88,10 @@ Sysmon Event ID `22` followed approximately 57 ms later:
 - Query: `example.com`
 - Query status: `0`
 - Results included `2606:4700:10::ac42:93f3`
+
+![Sysmon Event ID 22 showing curl.exe resolving example.com](../evidence/05-capstone-dns-query.png)
+
+*Sysmon Event ID `22` showing PID `6596` (`curl.exe`) resolving `example.com`, providing the DNS evidence used to correlate the subsequent outbound HTTPS connection.*
 
 Sysmon Event ID `3` then recorded an initiated TCP connection from PID `6596` to:
 
@@ -128,6 +140,10 @@ Microsoft Defender Event ID `1117` confirmed remediation:
 - Additional actions: `No additional actions required`
 - Error code: `0x00000000`
 - Detection user: `LAB-ENDPOINT-01\User1`
+
+![Microsoft Defender Event ID 1117 showing successful EICAR quarantine](../evidence/06-capstone-defender-quarantine.png)
+
+*Microsoft Defender Event ID `1117` confirming successful quarantine of the EICAR test artifact and reporting `No additional actions required`.*
 
 A subsequent filesystem check confirmed the EICAR file was no longer present.
 
