@@ -1,0 +1,25 @@
+# Virtual machines and disk images
+*.utm/
+*.iso
+*.img
+*.qcow2
+*.vhd
+*.vhdx
+*.vmdk
+*.ova
+*.ovf
+
+# Credentials and secret material
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.p12
+secrets.*
+credentials.*
+
+# OS and editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/
