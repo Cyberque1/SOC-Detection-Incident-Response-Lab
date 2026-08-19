@@ -104,6 +104,10 @@ Centralized evidence included:
 - ScriptBlock ID: `7d2fbf35-cb99-4c48-815f-10c1a3c2a9f7`
 - ScriptBlock text: `$LAB14PS="LAB14-POWERSHELL-TEST"; Write-Output $LAB14PS`
 
+![Wazuh Discover showing PowerShell Event ID 4104 and LAB14-POWERSHELL-TEST script block](../evidence/01-wazuh-powershell-4104.png)
+
+*Wazuh Discover showing centralized PowerShell Event ID `4104` from `Lab-Endpoint-01`, including the captured `LAB14-POWERSHELL-TEST` script block.*
+
 This demonstrated centralized visibility into PowerShell script content rather than relying only on process metadata.
 
 ## Microsoft Defender Verification
@@ -122,6 +126,10 @@ Local Defender telemetry showed:
 - Result: no additional actions required
 
 The corresponding Defender event was then located in Wazuh using the Windows event ID and endpoint identity. The centralized record included the same threat identifier, severity, endpoint, and file path.
+
+![Wazuh Discover showing Microsoft Defender EICAR detection for Lab-Endpoint-01](../evidence/02-wazuh-defender-detection.png)
+
+*Microsoft Defender Event ID `1116` indexed in Wazuh, showing the controlled EICAR detection with endpoint, severity, threat, and file-path context.*
 
 ## Findings
 
