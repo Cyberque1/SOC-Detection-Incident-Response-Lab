@@ -1,4 +1,4 @@
-# Cybersecurity Home Lab — SOC Detection & Incident Response
+# SOC Detection & Incident Response Home Lab
 
 A completed 15-lab Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, persistence analysis, DNS investigation, Microsoft Defender alert triage, centralized SIEM ingestion, incident investigation, and multi-source security-event correlation.
 
