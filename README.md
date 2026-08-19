@@ -1,6 +1,10 @@
-# Cybersecurity Home Lab
+# Cybersecurity Home Lab — SOC Detection & Incident Response
 
-A hands-on Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, persistence analysis, DNS investigation, Microsoft Defender alert triage, centralized SIEM ingestion, incident investigation, and multi-source security-event correlation.
+A completed 15-lab Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, persistence analysis, DNS investigation, Microsoft Defender alert triage, centralized SIEM ingestion, incident investigation, and multi-source security-event correlation.
+
+**Status:** Complete — 15 documented investigations
+
+**Core stack:** Wazuh SIEM · Sysmon · Microsoft Defender · PowerShell · Windows Event Logs · Kali Linux · Nmap · Netcat · UTM
 
 ## Project Goal
 
@@ -43,7 +47,7 @@ All testing is performed in a personally controlled virtual lab.
 ## Portfolio Highlights
 
 ### Port-Scan Detection
-Generated a controlled Nmap SYN scan and detected the activity from the Windows defender perspective using Windows Firewall logs and Windows Filtering Platform events. Correlated a rapid one-to-many-port probe pattern across TCP ports `21, 22, 23, 80, 443, 445, 3389, 8080`.
+Generated a controlled Nmap SYN scan and detected the activity from the Windows endpoint perspective using Windows Firewall logs and Windows Filtering Platform events. Correlated a rapid one-to-many-port probe pattern across TCP ports `21, 22, 23, 80, 443, 445, 3389, 8080`.
 
 [View investigation](docs/06-port-scan-detection.md)
 
@@ -123,9 +127,9 @@ Investigated a controlled multi-stage endpoint scenario in Wazuh, beginning with
 
 | Document | Focus |
 |---|---|
-| [01 — Lab Architecture](docs/01-lab-architecture.md) | Virtual environment, roles, and telemetry sources |
+| [01 — Lab Architecture](docs/01-lab-architecture.md) | Three-VM architecture, roles, network, and telemetry flow |
 | [02 — Windows Event Logs](docs/02-windows-event-logs.md) | Authentication-event analysis with 4624/4625 |
-| [03 — Sysmon Monitoring](docs/03-sysmon-monitoring.md) | Endpoint process and network telemetry |
+| [03 — Sysmon Monitoring](docs/03-sysmon-monitoring.md) | Process, network, DNS, file, and registry telemetry |
 | [04 — Network Connectivity](docs/04-network-connectivity.md) | Network validation and host-role mapping |
 | [05 — TCP 8080 Investigation](docs/05-tcp-8080-investigation.md) | Inbound TCP connection and Sysmon Event ID 3 |
 | [06 — Port-Scan Detection](docs/06-port-scan-detection.md) | Nmap reconnaissance detection with WFP events |
@@ -143,4 +147,4 @@ Investigated a controlled multi-stage endpoint scenario in Wazuh, beginning with
 
 All activity documented here is generated inside an isolated, personally controlled lab for defensive learning and detection engineering practice.
 
-Virtual machine images, credentials, secrets, private keys, tokens, and other sensitive material are not stored in this repository.
+The repository contains sanitized investigation write-ups only. Virtual machine images, credentials, secrets, private keys, tokens, and other sensitive material are not stored here.
