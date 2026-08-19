@@ -1,6 +1,6 @@
 # Cybersecurity Home Lab
 
-A hands-on Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, persistence analysis, DNS investigation, Microsoft Defender alert triage, centralized SIEM ingestion, and multi-source security-event correlation.
+A hands-on Blue Team / SOC portfolio demonstrating Windows endpoint monitoring, event-log analysis, Sysmon telemetry, PowerShell visibility, network detection, persistence analysis, DNS investigation, Microsoft Defender alert triage, centralized SIEM ingestion, incident investigation, and multi-source security-event correlation.
 
 ## Project Goal
 
@@ -87,10 +87,17 @@ Deployed a Wazuh SIEM server, enrolled the Windows endpoint, and centralized Sys
 
 [View investigation](docs/14-wazuh-siem-centralized-telemetry.md)
 
+### SOC Capstone Investigation
+Investigated a controlled multi-stage endpoint scenario in Wazuh, beginning with a Defender detection and working backward through encoded PowerShell, file creation, DNS, outbound HTTPS, registry persistence, and remediation telemetry. Correlated events using PID, ProcessGuid, timestamps, parent-child relationships, DNS results, destination IPs, and user context to reconstruct the incident and determine scope, containment, and disposition.
+
+[View investigation](docs/15-soc-capstone-investigation.md)
+
 ## Skills Demonstrated
 
 - Wazuh SIEM deployment, agent enrollment, and centralized telemetry analysis
 - Raw-event indexing and threat hunting with Wazuh Discover
+- SOC alert triage, investigation, scope determination, and disposition
+- Alert-to-root-activity pivoting and timeline reconstruction
 - Windows Event Viewer and Security log analysis
 - Sysmon configuration and telemetry analysis
 - Microsoft Defender Antivirus alert and remediation analysis
@@ -109,7 +116,7 @@ Deployed a Wazuh SIEM server, enrolled the Windows endpoint, and centralized Sys
 - Timeline reconstruction using UTC and local timestamps
 - SHA-256 hashing and file-artifact analysis
 - PowerShell-based log querying and structured XML parsing
-- SOC alert triage and disposition
+- Handling incomplete telemetry without overclaiming
 - Technical security documentation
 
 ## Investigations
@@ -130,6 +137,7 @@ Deployed a Wazuh SIEM server, enrolled the Windows endpoint, and centralized Sys
 | [12 — Defender Detection and Triage](docs/12-defender-detection-triage.md) | Defender 1116/1117 with Sysmon process/file correlation |
 | [13 — Scheduled Task Persistence Detection](docs/13-scheduled-task-persistence-detection.md) | Security 4698, Sysmon process telemetry, and privilege comparison |
 | [14 — Wazuh SIEM and Centralized Telemetry](docs/14-wazuh-siem-centralized-telemetry.md) | Wazuh deployment, raw archives, and centralized Sysmon/PowerShell/Defender ingestion |
+| [15 — SOC Capstone Investigation](docs/15-soc-capstone-investigation.md) | Multi-stage Wazuh investigation, correlation, scope, containment, and disposition |
 
 ## Security and Scope
 
