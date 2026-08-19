@@ -44,6 +44,32 @@ All testing is performed in a personally controlled virtual lab.
 | `LAB-KALI-01` | Controlled traffic/test system | `192.168.64.3` |
 | `LAB-WAZUH-01` | Wazuh SIEM server | `192.168.64.4` |
 
+## Evidence Highlights
+
+### Centralized PowerShell Visibility
+
+![Wazuh Discover showing PowerShell Event ID 4104 from Lab-Endpoint-01](evidence/01-wazuh-powershell-4104.png)
+
+Wazuh Discover displaying PowerShell Event ID `4104` from `Lab-Endpoint-01`, including captured script-block content. This validates end-to-end collection from the Windows endpoint into the centralized SIEM.
+
+### Microsoft Defender Detection in Wazuh
+
+![Wazuh Discover showing Microsoft Defender EICAR detection from Lab-Endpoint-01](evidence/02-wazuh-defender-detection.png)
+
+Microsoft Defender Event ID `1116` indexed in Wazuh for the controlled EICAR test artifact, demonstrating centralized alert visibility with endpoint, severity, threat, and file-path context.
+
+### Encoded PowerShell Investigation
+
+![Sysmon Event ID 1 showing PowerShell launched with EncodedCommand](evidence/03-capstone-encoded-powershell.png)
+
+Sysmon Event ID `1` from the capstone showing a medium-integrity PowerShell child launched with `-EncodedCommand`, providing the process context used to pivot into PowerShell Script Block Logging.
+
+### Defender Containment Confirmation
+
+![Microsoft Defender Event ID 1117 showing successful quarantine](evidence/06-capstone-defender-quarantine.png)
+
+Microsoft Defender Event ID `1117` confirming quarantine and `No additional actions required`, providing evidence that the detected EICAR artifact was successfully contained.
+
 ## Portfolio Highlights
 
 ### Port-Scan Detection
